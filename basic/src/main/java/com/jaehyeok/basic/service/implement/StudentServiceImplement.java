@@ -42,6 +42,7 @@ public class StudentServiceImplement implements StudentService{
     boolean isExistedStudent = studentRepository.existsById(studentNumber);
     if (!isExistedStudent) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("존재하지 않는 학생입니다");
 
+    // UPDATE (SQL : UPDATE)
     // 1. student 클래스로 접근
     StudentEntity studentEntity = studentRepository.
     // 2. dto.studentNumber에 해당하는 인스턴스를 검색
@@ -58,6 +59,7 @@ public class StudentServiceImplement implements StudentService{
   @Override
   public ResponseEntity<String> deleteStudent(Integer studentNumber) {
 
+    // DELETE (SQL : DELETE)
     studentRepository.deleteById(studentNumber);
     
     return ResponseEntity.status(HttpStatus.OK).body("성공!");
