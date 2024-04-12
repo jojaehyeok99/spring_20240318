@@ -10,5 +10,7 @@ public interface BasicService {
   String gerApple();
 
   String getJwt(String principle);
+
+  String jwtValidate(String jwt);
 }
 
