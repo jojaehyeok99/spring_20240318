@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.configurers.CsrfConfig
 import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -20,6 +21,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.jaehyeok.basic.filter.JwtAuthenticationFilter;
+import com.jaehyeok.basic.provider.OAuth2SuccessHandler;
+import com.jaehyeok.basic.service.implement.OAuth2UserServiceImplement;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,6 +38,8 @@ import lombok.RequiredArgsConstructor;
 public class WebSecurityConfig {
 
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
+  private final OAuth2UserServiceImplement oAuth2UserService;
+  private final OAuth2SuccessHandler oAuth2SuccessHandler;
   
   // @Bean : 
   // - Spring bean으로 등록하는 어노테이션
@@ -100,8 +105,19 @@ public class WebSecurityConfig {
       // 특정 URL 패턴에 대한 요청은 지정한 권한을 가지고 있는 사용자만 접근을 허용
       // .requestMatchers("/student","/student/**").hasRole("STUDENT")
       .requestMatchers("/student","/student/**").permitAll()
+      .requestMatchers("/oauth2/**","/").permitAll()
       // 인증된 사용자는 모두 접근을 허용
       .anyRequest().authenticated()
+    )
+    //
+    .oauth2Login(oauth2 -> oauth2
+      // OAuth 인증 서버에서 redirection 하는 URL 지정(EX. github, naver, kakao로 인증 보내는 서버 주소)
+      .redirectionEndpoint(endpoint -> endpoint.baseUri("/oauth2/callback/*"))
+      // OAuth 인증 서버에서 인증 절차가 끝난 후 사용자에 대한 정보를 처리하는 객체를 지정
+      .userInfoEndpoint(endpoint -> endpoint.userService(oAuth2UserService))
+      // OAuth 인증 요청 성공 시 처리하는 객체를 지정
+      .successHandler(oAuth2SuccessHandler)
+
     )
 
     // 인증 과정 중에 발생한 예외 처리
